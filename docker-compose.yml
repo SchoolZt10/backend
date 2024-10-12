@@ -23,7 +23,7 @@ services:
     container_name: nginx_school
     image: nginx:latest
     ports:
-      - "6971:6970"
+      - "6972:6970"
     expose:
       - 80
     volumes:
