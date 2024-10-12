@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "6070:3000" 
+      - "6071:3000" 
     volumes:
       - .:/app
       - ./cdn:/app/cdn
