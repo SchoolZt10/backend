@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  backend:
+  sc_backend:
     container_name: backend_school
     build: 
       context: .
@@ -19,8 +19,8 @@ services:
       - mongo
     restart: always
 
-  nginx:
-    container_name: nginx
+  sc_nginx:
+    container_name: nginx_school
     image: nginx:latest
     ports:
       - "6970:6970"
