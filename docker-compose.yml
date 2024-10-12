@@ -16,8 +16,7 @@ services:
     networks:
       - webnet
     depends_on:
-      - postgres_db
-      - redis
+      - mongo
     restart: always
 
   nginx:
