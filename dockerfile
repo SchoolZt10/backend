@@ -21,4 +21,5 @@ COPY --from=builder /app/prisma ./prisma
 
 RUN npx prisma generate
 
+
 EXPOSE 3000
