@@ -20,6 +20,8 @@ services:
   sc_nginx:
     container_name: nginx_school
     image: nginx:latest
+    ports:
+      - "6972:80"
     expose:
       - 80
     volumes:
