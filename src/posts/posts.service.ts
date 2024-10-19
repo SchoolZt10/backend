@@ -3,6 +3,9 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { PrismaService } from 'src/prisma.service';
 import { FileManagerService } from 'src/services/file-manager/file-manager.service';
 import slugify from 'slugify';
+import { Post } from '@prisma/client';
+import { generateRandomDigits } from 'src/utils';
+import { UpdatePostDto } from './dto/edit-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -15,9 +18,19 @@ export class PostsService {
     return { ...post, categoryName: post.Category?.name || null, Category: undefined };
   }
 
+  async saveImage(post: Post, image: Express.Multer.File) {
+    const fileName = post.id
+    const fileType = image.mimetype.split('/')[1];
+    const filePath = `/images/${fileName}.${fileType}`;
+
+    await this.fileManagerService.writeFile(filePath, image.buffer);
+
+    return filePath;
+  }
+
   async create(createPostDto: CreatePostDto, image: Express.Multer.File) {
-    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
-    const slug = slugify((createPostDto.title.toLowerCase().trimStart().replace(/ /g, '-')) + '-' + randomDigits)
+
+    const slug = slugify((createPostDto.title.toLowerCase().trimStart().replace(/ /g, '-')) + '-' + generateRandomDigits())
 
     const post = await this.prismaService.post.create({
       data: {
@@ -26,11 +39,7 @@ export class PostsService {
       }
     })
 
-    const fileName = post.id
-    const fileType = image.mimetype.split('/')[1];
-    const filePath = `/images/${fileName}.${fileType}`;
-
-    await this.fileManagerService.writeFile(filePath, image.buffer);
+    const filePath = await this.saveImage(post, image);
     post.image = filePath;
 
     await this.prismaService.post.update({
@@ -43,6 +52,36 @@ export class PostsService {
     })
 
     return post;
+  }
+
+  async update(id: string, updatePostDto: UpdatePostDto, image: Express.Multer.File) {
+    const slug = slugify((updatePostDto.title.toLowerCase().trimStart().replace(/ /g, '-')) + '-' + generateRandomDigits())
+
+    const updatedPost = await this.prismaService.post.update({
+      where: {
+        id: id
+      },
+      data: {
+        ...updatePostDto,
+        slug
+      }
+    })
+
+    if (image) {
+      const filePath = await this.saveImage(updatedPost, image);
+      updatedPost.image = filePath;
+
+      await this.prismaService.post.update({
+        where: {
+          id: updatedPost.id
+        },
+        data: {
+          image: filePath
+        }
+      })
+    }
+
+    return updatedPost;
   }
 
   findAll() {

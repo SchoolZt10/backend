@@ -6,8 +6,8 @@ export class PostEntity {
   id: string;
   title: string;
   content: string;
-  createdAt: Date;
-  categoryId: string | null;
+  createdAt?: Date;
+  categoryId?: string | null;
   categoryName: string | null;
   image: string | null;
   slug: string;

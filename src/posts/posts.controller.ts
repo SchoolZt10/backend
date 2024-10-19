@@ -16,6 +16,13 @@ export class PostsController {
     return this.postsService.create(createPostDto, image);
   }
 
+  @Patch(':postId')
+  @UseGuards(PostsGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  update(@Param('postId') postId: string, @Body() updatePostDto: CreatePostDto, @UploadedFile() image: Express.Multer.File) {
+    return this.postsService.update(postId, updatePostDto, image);
+  }
+
   @Get()
   findAll() {
     return this.postsService.findAll().then(posts => posts.map(post => new PostEntity(post)));

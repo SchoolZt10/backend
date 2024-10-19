@@ -1,6 +1,7 @@
 import { IsOptional, IsString, MaxLength } from "class-validator";
+import { CreatePostDto } from "./create-post.dto";
 
-export class CreatePostDto {
+export class UpdatePostDto extends CreatePostDto {
   @MaxLength(128)
   @IsString()
   title: string;
