@@ -4,6 +4,9 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { PostsGuard } from './posts.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PostEntity } from './entities/post.entity';
+import { GetUser } from 'src/auth/decorators/user.decorator';
+import { User } from '@prisma/client';
+import { UserGuard } from 'src/auth/guards/user.guard';
 
 @Controller('posts')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -11,9 +14,14 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) { }
 
   @Post()
+  @UseGuards(UserGuard)
   @UseInterceptors(FileInterceptor('image'))
-  create(@Body() createPostDto: CreatePostDto, @UploadedFile() image: Express.Multer.File) {
-    return this.postsService.create(createPostDto, image);
+  create(
+    @GetUser() user: User,
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFile() image: Express.Multer.File
+  ) {
+    return this.postsService.create(user.id, createPostDto, image);
   }
 
   @Patch(':postId')
@@ -24,7 +32,7 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.postsService.findAll().then(posts => posts.map(post => new PostEntity(post)));
   }
 
@@ -40,15 +48,22 @@ export class PostsController {
 
   @Get(':postId')
   @UseGuards(PostsGuard)
-  findOne(@Param('postId') postId: string) {
+  async findOne(@Param('postId') postId: string) {
     return this.postsService.findOne(postId).then(post => new PostEntity(post));
   }
 
   @Delete(':postId')
-  @UseGuards(PostsGuard)
-  remove(@Param('postId') postId: string) {
+  @UseGuards(PostsGuard, UserGuard)
+  async remove(
+    @GetUser() user: User,
+    @Param('postId') postId: string
+  ) {
+    const post = await this.postsService.findOne(postId);
+
+    if (post.userId !== user.id) {
+      throw new Error('Unauthorized');
+    }
+
     return this.postsService.remove(postId);
   }
-
-
 }

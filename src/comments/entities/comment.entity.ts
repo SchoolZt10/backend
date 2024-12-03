@@ -2,6 +2,10 @@ import { Exclude, Expose } from "class-transformer";
 import { format, formatRelative, subDays } from 'date-fns'
 import { uk } from 'date-fns/locale'
 
+export class UserCommentEntity {
+  name: string;
+}
+
 export class CommentEntity {
   id: string;
   username: string;
@@ -12,6 +16,8 @@ export class CommentEntity {
   postId: string;
   @Exclude()
   createdAt: Date;
+
+  user: UserCommentEntity;
 
   @Expose({ name: 'createdAt' })
   _createdAt() {

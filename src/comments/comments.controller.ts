@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ClassSerializerInterceptor, UseGuards } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CommentEntity } from './entities/comment.entity';
+import { UserGuard } from 'src/auth/guards/user.guard';
+import { GetUser } from 'src/auth/decorators/user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('comments')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -9,8 +12,12 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) { }
 
   @Post()
-  async create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentsService.create(createCommentDto).then(
+  @UseGuards(UserGuard)
+  async create(
+    @GetUser() user: User,
+    @Body() createCommentDto: CreateCommentDto
+  ) {
+    return this.commentsService.create(user.id, createCommentDto).then(
       (comment) => new CommentEntity(comment)
     );
   }

@@ -28,7 +28,7 @@ export class PostsService {
     return filePath;
   }
 
-  async create(createPostDto: CreatePostDto, image: Express.Multer.File) {
+  async create(userId: number, createPostDto: CreatePostDto, image: Express.Multer.File) {
 
     const slug = slugify((createPostDto.title.toLowerCase().trimStart().replace(/ /g, '-')) + '-' + generateRandomDigits())
 
@@ -36,6 +36,7 @@ export class PostsService {
       data: {
         ...createPostDto,
         slug,
+        userId
       }
     })
 
@@ -84,7 +85,7 @@ export class PostsService {
     return updatedPost;
   }
 
-  findAll() {
+  async findAll() {
     return this.prismaService.post.findMany({
       include: {
         Category: true
@@ -92,7 +93,7 @@ export class PostsService {
     }).then(posts => posts.map(this.transformPost));
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.prismaService.post.findUnique({
       where: {
         id: id,
@@ -103,7 +104,7 @@ export class PostsService {
     }).then(this.transformPost);
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.prismaService.post.delete({
       where: {
         id: id,

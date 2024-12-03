@@ -8,9 +8,12 @@ export class CommentsService {
     private prismaService: PrismaService,
   ) { }
 
-  create(createCommentDto: CreateCommentDto) {
+  create(userId: number, createCommentDto: CreateCommentDto) {
     return this.prismaService.comment.create({
-      data: createCommentDto
+      data: {
+        ...createCommentDto,
+        userId: userId
+      }
     })
   }
 
@@ -18,6 +21,9 @@ export class CommentsService {
     return this.prismaService.comment.findMany({
       where: {
         postId: postId
+      },
+      include: {
+        user: true
       }
     });
   }

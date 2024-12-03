@@ -1,30 +1,25 @@
 import { Injectable } from "@nestjs/common";
-import * as fs from 'fs/promises';
-import { env } from 'process';
+import { IFileManager } from "./file-manager.abstract";
+import { LocalFileManager } from "./implementations/LocalFileManager";
+
 
 @Injectable()
 export class FileManagerService {
-  private readonly _folderPath =
-    env['NODE_ENV'] === 'development' ? './cdn' : '/app/cdn';
+  private readonly fileManager: IFileManager = new LocalFileManager();
 
   async readFile(path: string): Promise<any> {
-    return fs.readFile(this._folderPath + path, { encoding: 'utf-8' });
+    return await this.fileManager.readFile(path);
   }
 
   async writeFile(path: string, content: string | Buffer): Promise<void> {
-    await fs.writeFile(this._folderPath + path, content);
+    return await this.fileManager.writeFile(path, content);
   }
 
   async deleteFile(path: string): Promise<void> {
-    await fs.unlink(this._folderPath + path);
+    return await this.fileManager.deleteFile(path);
   }
 
   async existsFile(path: string): Promise<boolean> {
-    try {
-      await fs.access(this._folderPath + path);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return await this.fileManager.existsFile(path);
   }
 }

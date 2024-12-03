@@ -1,42 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       Int      @id @unique @default(autoincrement())
+  name     String
+  email    String   @unique
+  password String
+  role     Role     @default(STUDENT)
+  profile  Profile?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Post      Post[]
+  Comment   Comment[]
+}
+
+model Profile {
+  id      Int     @id @unique @default(autoincrement())
+  userId  Int     @unique
+  user    User    @relation(fields: [userId], references: [id])
+  bio     String?
+  phone   String?
+  address String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Category {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  id   String @id @unique @default(uuid()) @map("id")
   name String @unique
   Post Post[]
 }
 
 model Post {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String    @id @unique @default(uuid()) @map("id")
   slug       String    @unique
   title      String
   content    String
   image      String?
   createdAt  DateTime  @default(now())
   Comment    Comment[]
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
   Category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?   @db.ObjectId
+  categoryId String?
 }
 
 model Comment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  username  String   @db.String()
-  email     String
+  id        String   @id @unique @default(uuid()) @map("id")
   comment   String
   createdAt DateTime @default(now())
-  post      Post     @relation(fields: [postId], references: [id])
-  postId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+enum Subject {
+  MATH
+  SCIENCE
+  HISTORY
+  LANGUAGE
+  PHYSICAL_EDUCATION
 }
