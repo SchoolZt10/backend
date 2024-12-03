@@ -38,7 +38,7 @@ services:
     container_name: postgres_db_school
     image: postgres:14
     ports:
-      - "5436:5432"
+      - "5437:5432"
     env_file:
       - .env
     volumes:
@@ -53,7 +53,7 @@ services:
     image: redis:latest
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
     ports:
-      - "6380:6379"
+      - "6381:6379"
     networks:
       - webnet
     env_file:
