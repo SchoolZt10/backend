@@ -57,7 +57,7 @@ services:
     links:
       - postgres_db:postgres_db
     depends_on:
-      - postgres_db
+      - sc_postgres_db
     environment:
       - POSTGRES_HOST=postgres_db
       - POSTGRES_DB=${POSTGRES_DB}
